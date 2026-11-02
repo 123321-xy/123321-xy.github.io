@@ -1,0 +1,866 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Xinyi Hu</title>
+<meta name="description" content="Xinyi Hu — backend & distributed systems engineer. MS CS at Northeastern, previously SDE intern on AWS RDS Proxy.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23e4572e'/%3E%3Ctext x='32' y='42' font-family='Georgia,serif' font-style='italic' font-size='30' text-anchor='middle' fill='%23fffaf0'%3Exh%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f6f1e7;
+  --surface: #fffaf0;
+  --ink: #1d1a16;
+  --muted: #6b645a;
+  --line: #e2d8c6;
+  --accent: #e4572e;
+  --ok: #2a9d8f;
+  --warn: #d9a21b;
+  --term-bg: #1d1a16;
+  --term-ink: #f3ece0;
+  --term-dim: #9b9284;
+  --shadow: 0 1px 0 rgba(29,26,22,.06), 0 12px 32px -18px rgba(29,26,22,.35);
+  --serif: "Instrument Serif", Georgia, serif;
+  --sans: "DM Sans", system-ui, -apple-system, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14120f; --surface: #1d1a16; --ink: #f3ece0; --muted: #a39a8c; --line: #342f28;
+    --accent: #ff7a4d; --ok: #4fc3b2; --warn: #f0c04a;
+    --term-bg: #0d0c0a; --term-ink: #f3ece0; --term-dim: #8a8174;
+    --shadow: 0 1px 0 rgba(0,0,0,.4), 0 12px 32px -18px rgba(0,0,0,.8);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14120f; --surface: #1d1a16; --ink: #f3ece0; --muted: #a39a8c; --line: #342f28;
+  --accent: #ff7a4d; --ok: #4fc3b2; --warn: #f0c04a;
+  --term-bg: #0d0c0a; --term-ink: #f3ece0; --term-dim: #8a8174;
+  --shadow: 0 1px 0 rgba(0,0,0,.4), 0 12px 32px -18px rgba(0,0,0,.8);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: var(--sans); font-size: 17px; line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  transition: background .3s, color .3s;
+}
+a { color: inherit; text-decoration-color: var(--accent); text-underline-offset: 3px; }
+a:hover { color: var(--accent); }
+::selection { background: var(--accent); color: var(--surface); }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+@media (min-width: 640px) { .wrap { padding: 0 28px; } }
+.mono { font-family: var(--mono); }
+
+/* ---------- nav ---------- */
+nav {
+  position: sticky; top: 0; z-index: 10;
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+nav .wrap { display: flex; align-items: center; gap: 16px; height: 58px; }
+.logo { font-family: var(--serif); font-style: italic; font-size: 28px; text-decoration: none; line-height: 1; }
+.logo span { color: var(--accent); }
+.navlinks { display: none; gap: 22px; margin-left: auto; font-size: 15px; }
+.navlinks a { text-decoration: none; color: var(--muted); }
+.navlinks a:hover { color: var(--ink); }
+@media (min-width: 760px) { .navlinks { display: flex; } }
+.status-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--mono); font-size: 12px; color: var(--muted);
+  padding: 4px 10px; border: 1px solid var(--line); border-radius: 999px;
+  margin-left: auto; white-space: nowrap;
+}
+@media (min-width: 760px) { .status-pill { margin-left: 0; } }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 0 var(--ok); animation: pulse 2.4s infinite; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ok) 60%, transparent); } 70% { box-shadow: 0 0 0 8px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+.theme-btn {
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  width: 36px; height: 36px; border-radius: 10px; cursor: pointer; font-size: 16px;
+  display: grid; place-items: center; flex-shrink: 0;
+}
+.theme-btn:hover { border-color: var(--accent); }
+
+/* ---------- hero ---------- */
+.hero { padding: 56px 0 40px; display: grid; gap: 40px; }
+@media (min-width: 900px) { .hero { grid-template-columns: 1.05fr 1fr; align-items: center; padding: 88px 0 64px; } }
+.eyebrow { font-family: var(--mono); font-size: 13px; color: var(--muted); letter-spacing: .02em; }
+.eyebrow b { color: var(--accent); font-weight: 600; }
+h1 {
+  font-family: var(--serif); font-weight: 400; font-size: clamp(64px, 13vw, 128px);
+  line-height: .9; margin: 14px 0 18px; letter-spacing: -.02em;
+}
+h1 em { color: var(--accent); }
+.tagline { font-family: var(--serif); font-size: clamp(24px, 3.6vw, 32px); line-height: 1.2; margin: 0 0 18px; }
+.tagline em { background: linear-gradient(transparent 62%, color-mix(in srgb, var(--accent) 28%, transparent) 62%); font-style: italic; }
+.lede { color: var(--muted); max-width: 52ch; margin: 0 0 26px; }
+.cta { display: flex; flex-wrap: wrap; gap: 10px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
+  padding: 10px 18px; border-radius: 999px; font-weight: 500; font-size: 15px;
+  border: 1px solid var(--ink); transition: transform .15s, background .15s, color .15s;
+  background: transparent; color: var(--ink); cursor: pointer; font-family: inherit;
+}
+.btn:hover { transform: translateY(-2px); color: var(--ink); }
+.btn.primary { background: var(--ink); color: var(--bg); }
+.btn.primary:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 18px;
+  box-shadow: var(--shadow);
+}
+.proxy-card { padding: 14px; }
+.proxy-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 2px 4px 10px; flex-wrap: wrap; }
+.proxy-head .title { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+#flow { width: 100%; height: 260px; display: block; border-radius: 12px; background: var(--bg); cursor: crosshair; }
+.proxy-foot { display: flex; justify-content: space-between; gap: 12px; padding: 10px 4px 2px; font-family: var(--mono); font-size: 12px; color: var(--muted); flex-wrap: wrap; }
+.proxy-foot b { color: var(--ink); font-weight: 600; }
+.switch { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-family: var(--mono); font-size: 12px; user-select: none; }
+.switch input { position: absolute; opacity: 0; pointer-events: none; }
+.switch .track { width: 34px; height: 20px; border-radius: 999px; background: var(--line); position: relative; transition: background .2s; }
+.switch .track::after { content: ""; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: var(--surface); transition: transform .2s; box-shadow: 0 1px 2px rgba(0,0,0,.25); }
+.switch input:checked + .track { background: var(--ok); }
+.switch input:checked + .track::after { transform: translateX(14px); }
+.switch input:focus-visible + .track { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- sections ---------- */
+section { padding: 56px 0; border-top: 1px solid var(--line); }
+.sec-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 28px; flex-wrap: wrap; }
+.sec-num { font-family: var(--mono); font-size: 13px; color: var(--accent); }
+h2 { font-family: var(--serif); font-weight: 400; font-size: clamp(36px, 6vw, 52px); line-height: 1; margin: 0; letter-spacing: -.01em; }
+h2 em { color: var(--accent); }
+.sec-sub { color: var(--muted); font-size: 15px; width: 100%; margin: 4px 0 0; }
+h3 { font-size: 20px; margin: 0; font-weight: 700; letter-spacing: -.01em; }
+
+/* ---------- terminal ---------- */
+.term {
+  background: var(--term-bg); color: var(--term-ink); border-radius: 16px; overflow: hidden;
+  font-family: var(--mono); font-size: 14px; box-shadow: var(--shadow);
+}
+.term-bar { display: flex; align-items: center; gap: 7px; padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,.08); }
+.term-bar i { width: 11px; height: 11px; border-radius: 50%; display: block; }
+.term-bar i:nth-child(1) { background: #ff5f57; } .term-bar i:nth-child(2) { background: #febc2e; } .term-bar i:nth-child(3) { background: #28c840; }
+.term-bar span { margin-left: 8px; color: var(--term-dim); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.term-body { padding: 16px; height: 360px; overflow-y: auto; overflow-x: hidden; }
+.term-body pre { margin: 0; white-space: pre-wrap; word-break: break-word; font-family: inherit; }
+.term-body .tbl { display: block; white-space: pre; overflow-x: auto; }
+.term-line { display: flex; gap: 8px; align-items: center; }
+.prompt { color: #ff9a76; white-space: nowrap; }
+.term input {
+  flex: 1; min-width: 0; background: transparent; border: 0; outline: 0; color: var(--term-ink);
+  font: inherit; caret-color: #ff9a76;
+}
+.t-dim { color: var(--term-dim); } .t-ok { color: #6fd6c6; } .t-err { color: #ff8a80; } .t-acc { color: #ff9a76; } .t-warn { color: #f0c04a; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.chip {
+  font-family: var(--mono); font-size: 12.5px; padding: 6px 11px; border-radius: 999px;
+  border: 1px dashed var(--line); background: var(--surface); color: var(--ink); cursor: pointer;
+}
+.chip:hover { border-color: var(--accent); color: var(--accent); border-style: solid; }
+
+/* ---------- experience ---------- */
+.exp { padding: 26px; display: grid; gap: 22px; }
+@media (min-width: 860px) { .exp { grid-template-columns: 1fr 1.6fr; padding: 34px; } }
+.exp .co { font-family: var(--serif); font-size: 34px; line-height: 1.05; margin: 0 0 6px; }
+.exp .role { font-weight: 500; }
+.exp .when { font-family: var(--mono); font-size: 13px; color: var(--muted); margin-top: 6px; }
+.badge { display: inline-block; font-family: var(--mono); font-size: 11.5px; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); margin: 14px 6px 0 0; }
+.exp ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 14px; }
+.exp li { padding-left: 26px; position: relative; color: var(--ink); }
+.exp li::before { content: "→"; position: absolute; left: 0; color: var(--accent); font-family: var(--mono); }
+.exp li b { font-weight: 700; }
+.invariant {
+  grid-column: 1 / -1; border-radius: 14px; padding: 18px 20px;
+  background: color-mix(in srgb, var(--ok) 10%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--ok) 40%, var(--line));
+  display: grid; gap: 4px;
+}
+.invariant .k { font-family: var(--mono); font-size: 12px; color: var(--ok); text-transform: uppercase; letter-spacing: .08em; }
+.invariant q { font-family: var(--serif); font-size: clamp(20px, 3vw, 26px); line-height: 1.25; quotes: "“" "”"; }
+
+/* ---------- projects ---------- */
+.projects { display: grid; gap: 20px; }
+@media (min-width: 900px) { .projects { grid-template-columns: 1fr 1fr; } }
+.proj { padding: 24px; display: flex; flex-direction: column; gap: 14px; }
+.proj .stack { display: flex; flex-wrap: wrap; gap: 6px; }
+.proj .stack span { font-family: var(--mono); font-size: 11.5px; padding: 2px 8px; border-radius: 6px; background: var(--bg); color: var(--muted); border: 1px solid var(--line); }
+.proj p { margin: 0; color: var(--muted); font-size: 15.5px; }
+.demo { margin-top: auto; border: 1px solid var(--line); border-radius: 14px; padding: 16px; background: var(--bg); }
+.demo-label { font-family: var(--mono); font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 12px; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+
+.replicas { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 12px; }
+.rep {
+  aspect-ratio: 1 / 1.1; border-radius: 10px; border: 1.5px solid var(--line); background: var(--surface);
+  display: grid; place-items: center; font-family: var(--mono); font-size: 11px; color: var(--muted);
+  position: relative; transition: all .25s;
+}
+.rep.w { background: color-mix(in srgb, var(--accent) 22%, var(--surface)); border-color: var(--accent); color: var(--ink); }
+.rep.r { border-style: dashed; border-color: var(--ok); border-width: 2px; }
+.rep.w.r { box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 30%, transparent); }
+.rep.w.r::after { content: "✓"; position: absolute; top: -9px; right: -7px; background: var(--ok); color: #fff; width: 18px; height: 18px; border-radius: 50%; font-size: 11px; display: grid; place-items: center; }
+.qrow { display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 13px; flex-wrap: wrap; }
+.qrow input[type=range] { flex: 1; min-width: 120px; accent-color: var(--accent); }
+.qnote { font-size: 13.5px; color: var(--muted); margin: 10px 0 0; min-height: 3em; }
+.qnote b { color: var(--ink); }
+.mini { font-family: var(--mono); font-size: 12px; padding: 5px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.mini:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.mini:disabled { opacity: .4; cursor: not-allowed; }
+
+.versions { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.ver { font-family: var(--mono); font-size: 12px; padding: 4px 9px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); transition: all .2s; }
+.ver.active { border-color: var(--ink); color: var(--ink); font-weight: 600; }
+.ver.bad { text-decoration: line-through; color: var(--accent); border-color: color-mix(in srgb, var(--accent) 50%, var(--line)); }
+.ver.bad.active { text-decoration: none; background: color-mix(in srgb, var(--accent) 18%, var(--surface)); }
+.cfg { font-family: var(--mono); font-size: 12.5px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; white-space: pre; overflow-x: auto; }
+.svcs { display: flex; gap: 14px; flex-wrap: wrap; font-family: var(--mono); font-size: 12px; margin-bottom: 12px; }
+.svc { display: inline-flex; align-items: center; gap: 6px; }
+.svc i { width: 9px; height: 9px; border-radius: 50%; background: var(--ok); display: block; transition: background .2s; }
+.svc.down i { background: var(--accent); animation: blink .6s infinite alternate; }
+@keyframes blink { to { opacity: .3; } }
+.cv-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.cv-log { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-top: 10px; min-height: 1.6em; }
+
+/* ---------- skills ---------- */
+.pool { display: grid; gap: 14px; }
+@media (min-width: 760px) { .pool { grid-template-columns: repeat(2, 1fr); } }
+.pool-group { padding: 18px 20px; }
+.pool-group h4 { margin: 0 0 10px; font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; display: flex; justify-content: space-between; }
+.conns { display: flex; flex-wrap: wrap; gap: 7px; }
+.conn { font-size: 14px; padding: 4px 11px; border-radius: 8px; background: var(--bg); border: 1px solid var(--line); transition: all .15s; cursor: default; }
+.conn:hover { border-color: var(--accent); transform: translateY(-1px); }
+.conn.busy { border-color: var(--ok); color: var(--ok); }
+
+/* ---------- off the clock ---------- */
+.facts { display: grid; gap: 16px; }
+@media (min-width: 640px) { .facts { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 960px) { .facts { grid-template-columns: repeat(3, 1fr); } }
+.fact { padding: 22px; transition: transform .2s; }
+.fact:hover { transform: rotate(-.6deg) translateY(-3px); }
+.fact:nth-child(even):hover { transform: rotate(.6deg) translateY(-3px); }
+.fact .emoji { font-size: 30px; line-height: 1; }
+.fact h3 { margin: 12px 0 6px; font-size: 18px; }
+.fact p { margin: 0; color: var(--muted); font-size: 15px; }
+.fact .meta { font-family: var(--mono); font-size: 11.5px; color: var(--accent); margin-top: 12px; }
+
+/* ---------- changelog ---------- */
+.log { list-style: none; margin: 0; padding: 0; position: relative; }
+.log::before { content: ""; position: absolute; left: 7px; top: 8px; bottom: 8px; width: 2px; background: var(--line); }
+.log li { position: relative; padding: 0 0 26px 36px; }
+.log li::before { content: ""; position: absolute; left: 0; top: 6px; width: 16px; height: 16px; border-radius: 50%; background: var(--bg); border: 2px solid var(--accent); }
+.log li.future::before { border-style: dashed; border-color: var(--muted); }
+.log .when { font-family: var(--mono); font-size: 12.5px; color: var(--muted); }
+.log .what { margin: 2px 0 0; }
+.tag { font-family: var(--mono); font-size: 11px; padding: 1px 7px; border-radius: 6px; margin-left: 8px; vertical-align: 1px; border: 1px solid currentColor; }
+.tag.ship { color: var(--ok); } .tag.sched { color: var(--muted); } .tag.wip { color: var(--warn); } .tag.inc { color: var(--accent); }
+
+/* ---------- status / footer ---------- */
+.status { padding: 22px; }
+.status-row { display: grid; grid-template-columns: 1fr; gap: 6px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.status-row:last-child { border-bottom: 0; }
+@media (min-width: 720px) { .status-row { grid-template-columns: 200px 1fr 170px; align-items: center; gap: 16px; } }
+.status-row .name { font-weight: 500; }
+.bars { display: flex; gap: 2px; height: 26px; }
+.bars i { flex: 1; border-radius: 2px; background: var(--ok); opacity: .85; display: block; }
+.bars i.d { background: var(--warn); } .bars i.o { background: var(--accent); } .bars i.m { background: var(--line); }
+.state { font-family: var(--mono); font-size: 12.5px; }
+@media (min-width: 720px) { .state { text-align: right; } }
+.state.ok { color: var(--ok); } .state.deg { color: var(--warn); } .state.maint { color: var(--muted); }
+
+.contact { text-align: center; padding: 72px 0 40px; }
+.contact h2 { font-size: clamp(44px, 9vw, 88px); margin-bottom: 16px; }
+.contact p { color: var(--muted); max-width: 46ch; margin: 0 auto 26px; }
+.contact .cta { justify-content: center; }
+footer { padding: 26px 0 40px; color: var(--muted); font-size: 13px; font-family: var(--mono); }
+footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+.toast {
+  position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, calc(100% + 40px)); opacity: 0;
+  background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 12px;
+  font-family: var(--mono); font-size: 13px; transition: transform .35s cubic-bezier(.2,.9,.3,1.3), opacity .2s; z-index: 20;
+  max-width: calc(100vw - 32px);
+}
+.toast.show { transform: translate(-50%, 0); opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  html { scroll-behavior: auto; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a href="#top" class="logo">xh<span>.</span></a>
+    <div class="navlinks">
+      <a href="#shell">shell</a>
+      <a href="#work">work</a>
+      <a href="#projects">projects</a>
+      <a href="#offline">off the clock</a>
+      <a href="#status">status</a>
+    </div>
+    <span class="status-pill" title="xinyi.status"><span class="dot"></span><span id="pill-text">all systems operational</span></span>
+    <button class="theme-btn" id="theme" aria-label="Toggle dark mode">◐</button>
+  </div>
+</nav>
+
+<main class="wrap" id="top">
+
+  <header class="hero">
+    <div>
+      <div class="eyebrow">MS CS @ Northeastern · <b>ex-AWS RDS Proxy</b> · Washington</div>
+      <h1>Xinyi <em>Hu</em></h1>
+      <p class="tagline">I build backends that <em>keep their promises</em> — even halfway through a rollback.</p>
+      <p class="lede">Grad student in computer science, most recently an SDE intern on AWS RDS Proxy, where I spent a summer making sure a compliance flag never lies about encryption. I like distributed systems, databases, and correctness invariants short enough to fit in one sentence.</p>
+      <div class="cta">
+        <a class="btn primary" href="mailto:hazelhu26@outlook.com">Say hi ✉</a>
+        <a class="btn" href="#shell">Query me ↓</a>
+        <a class="btn" href="https://github.com/123321-xy" target="_blank" rel="noopener">GitHub ↗</a>
+      </div>
+    </div>
+
+    <div class="card proxy-card">
+      <div class="proxy-head">
+        <span class="title">// a tiny proxy, live. click to send traffic.</span>
+        <label class="switch"><input type="checkbox" id="tls" checked><span class="track"></span>require TLS</label>
+      </div>
+      <canvas id="flow" aria-label="Animated diagram: client requests flowing through a proxy into three database replicas; unencrypted requests are rejected when TLS is required."></canvas>
+      <div class="proxy-foot">
+        <span>served <b id="served">0</b></span>
+        <span>rejected (plaintext) <b id="rejected">0</b></span>
+        <span>flag lies <b>0</b> 😌</span>
+      </div>
+    </div>
+  </header>
+
+  <section id="shell">
+    <div class="sec-head">
+      <span class="sec-num">01</span>
+      <h2>Query <em>me</em></h2>
+      <p class="sec-sub">A read-only replica of my brain. Type <span class="mono">help</span>, or tap a suggestion. Writes are politely refused.</p>
+    </div>
+    <div class="term" id="term">
+      <div class="term-bar"><i></i><i></i><i></i><span>psql — visitor@xinyi:5432/brain (read replica)</span></div>
+      <div class="term-body" id="term-body">
+        <pre id="term-out"></pre>
+        <div class="term-line"><span class="prompt">brain=&gt;</span><input id="term-in" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Terminal input"></div>
+      </div>
+    </div>
+    <div class="chips" id="chips">
+      <button class="chip">whoami</button>
+      <button class="chip">SELECT * FROM education;</button>
+      <button class="chip">SELECT * FROM hobbies;</button>
+      <button class="chip">cat fun_facts.txt</button>
+      <button class="chip">EXPLAIN ANALYZE xinyi;</button>
+      <button class="chip">DROP TABLE xinyi;</button>
+      <button class="chip">sudo make coffee</button>
+    </div>
+  </section>
+
+  <section id="work">
+    <div class="sec-head">
+      <span class="sec-num">02</span>
+      <h2>Where I've <em>shipped</em></h2>
+    </div>
+    <article class="card exp">
+      <div>
+        <p class="co">Amazon Web Services</p>
+        <div class="role">Software Engineer Intern · RDS Proxy</div>
+        <div class="when">Jun 2026 — Aug 2026</div>
+        <span class="badge">TLS attestation</span><span class="badge">multi-tenant</span><span class="badge">design doc author</span>
+      </div>
+      <ul>
+        <li>Made a <b>multi-tenant database proxy</b> work with VPC-wide encryption enforcement. Customers under encryption-in-transit mandates no longer had to choose between the service and the control — and the fleet didn't need a migration to a different instance family to get there.</li>
+        <li><b>Wrote the service's design</b>: the correctness boundary, plus the validation and teardown ordering that keeps it true under partial failure and rollback.</li>
+        <li>Compared <b>three ways</b> to declare compliance across a live fleet and picked the one that reused existing infrastructure — bounded latency in exchange for zero new dependencies. Derived the connection-drain window from a platform guarantee instead of guessing from runtime data, which removed a whole class of races.</li>
+      </ul>
+      <div class="invariant">
+        <span class="k">The invariant I lived by all summer</span>
+        <q>A compliance flag must never remain set on traffic that is no longer encrypted.</q>
+      </div>
+    </article>
+  </section>
+
+  <section id="projects">
+    <div class="sec-head">
+      <span class="sec-num">03</span>
+      <h2>Things I <em>built</em></h2>
+      <p class="sec-sub">Both come with a toy you can poke.</p>
+    </div>
+    <div class="projects">
+      <article class="card proj">
+        <h3>ShoppingSystem</h3>
+        <div class="stack"><span>Java</span><span>Go</span><span>PostgreSQL</span><span>AWS RDS</span><span>ELB</span></div>
+        <p>A small e-commerce backend for a distributed systems course: Product and Cart services, each on five PostgreSQL replicas with streaming replication, stress-tested at up to 300 concurrent clients across two EC2 instances. The quorum settings came from how each service actually gets used.</p>
+        <div class="demo">
+          <div class="demo-label"><span>quorum playground · N = 5</span><span id="q-label">custom</span></div>
+          <div class="replicas" id="replicas"></div>
+          <div class="qrow">
+            <span>W = <b id="w-val">3</b></span>
+            <input type="range" id="w" min="1" max="5" value="3" aria-label="Write quorum W">
+            <span>R = <b id="r-val">3</b></span>
+          </div>
+          <div class="qrow" style="margin-top:10px">
+            <button class="mini" data-w="5">Product (read-heavy)</button>
+            <button class="mini" data-w="1">Cart (write-heavy)</button>
+          </div>
+          <p class="qnote" id="q-note"></p>
+        </div>
+      </article>
+
+      <article class="card proj">
+        <h3>ConfigVault</h3>
+        <div class="stack"><span>Java</span><span>Spring Boot</span><span>PostgreSQL</span><span>Redis</span><span>gRPC</span><span>K8s</span></div>
+        <p>Config management for a fleet of microservices: versioned storage in Postgres, a Redis hot path, and a gRPC push channel so services get updates without polling. Role-based permissions, an audit log on every change, and one-call rollback, because bad config was the team's top incident cause.</p>
+        <div class="demo">
+          <div class="demo-label"><span>config: checkout-service</span><span id="cv-state">healthy</span></div>
+          <div class="versions" id="versions"></div>
+          <div class="cfg" id="cfg"></div>
+          <div class="svcs" id="svcs">
+            <span class="svc"><i></i>cart</span><span class="svc"><i></i>checkout</span><span class="svc"><i></i>payments</span>
+          </div>
+          <div class="cv-actions">
+            <button class="mini" id="cv-push">push a "quick fix" 🙈</button>
+            <button class="mini" id="cv-rollback">rollback ↩</button>
+          </div>
+          <div class="cv-log" id="cv-log">audit: all quiet.</div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section id="stack">
+    <div class="sec-head">
+      <span class="sec-num">04</span>
+      <h2>Connection <em>pool</em></h2>
+      <p class="sec-sub">Tools I keep warm. Hover to check one out.</p>
+    </div>
+    <div class="pool">
+      <div class="card pool-group"><h4><span>backend</span><span class="mono" data-count></span></h4><div class="conns">
+        <span class="conn">Java</span><span class="conn">Go</span><span class="conn">Python</span><span class="conn">Spring Boot</span><span class="conn">Node.js</span><span class="conn">Express</span><span class="conn">gRPC</span><span class="conn">REST</span><span class="conn">SQL</span>
+      </div></div>
+      <div class="card pool-group"><h4><span>data</span><span class="mono" data-count></span></h4><div class="conns">
+        <span class="conn">PostgreSQL</span><span class="conn">MySQL</span><span class="conn">Redis</span><span class="conn">MongoDB</span><span class="conn">schema design</span><span class="conn">indexing</span><span class="conn">query plans</span><span class="conn">connection pooling</span>
+      </div></div>
+      <div class="card pool-group"><h4><span>cloud &amp; ops</span><span class="mono" data-count></span></h4><div class="conns">
+        <span class="conn">AWS</span><span class="conn">Docker</span><span class="conn">Kubernetes</span><span class="conn">Jenkins</span><span class="conn">CI/CD</span><span class="conn">Git</span>
+      </div></div>
+      <div class="card pool-group"><h4><span>ai / ml</span><span class="mono" data-count></span></h4><div class="conns">
+        <span class="conn">PyTorch</span><span class="conn">LLM APIs</span><span class="conn">RAG</span><span class="conn">LangChain</span><span class="conn">LlamaIndex</span><span class="conn">pgvector</span><span class="conn">Pinecone</span><span class="conn">fine-tuning</span><span class="conn">evals</span><span class="conn">React</span>
+      </div></div>
+    </div>
+  </section>
+
+  <section id="offline">
+    <div class="sec-head">
+      <span class="sec-num">05</span>
+      <h2>Off the <em>clock</em></h2>
+      <p class="sec-sub">Unverified, but highly available.</p>
+    </div>
+    <div class="facts">
+      <div class="card fact"><div class="emoji">🪴</div><h3>A pothos named Postgres</h3><p>Its cutting is named Replica. Replica lags about two leaves behind, which I consider within tolerance.</p><div class="meta">replication lag: ~2 leaves</div></div>
+      <div class="card fact"><div class="emoji">🧋</div><h3>Bubble tea, benchmarked</h3><p>I rate shops on p99 latency from order to first sip. Chewy-but-not-rubbery boba is a hard requirement, not a nice-to-have.</p><div class="meta">shops meeting SLO: 2 of 23</div></div>
+      <div class="card fact"><div class="emoji">🍜</div><h3>Hand-pulled noodles</h3><p>A Sunday project. When the dough tears, I retry with exponential backoff and more resting time.</p><div class="meta">success rate: 60% and climbing</div></div>
+      <div class="card fact"><div class="emoji">🥾</div><h3>PNW trail person</h3><p>I hike whenever it isn't raining, so I mostly hike in the rain. Drizzle is background noise, not an incident.</p><div class="meta">weather: best-effort delivery</div></div>
+      <div class="card fact"><div class="emoji">💬</div><h3>W=1, R=5 in group chats</h3><p>I write rarely and read everything. If you get a reply from me, it's durable.</p><div class="meta">consistency: strong, eventually</div></div>
+      <div class="card fact"><div class="emoji">🪜</div><h3>Favorite data structure</h3><p>The skip list: a linked list that learned to take the stairs. Runner-up: the B-tree, for always keeping its balance.</p><div class="meta">hot take: hash maps are overrated</div></div>
+    </div>
+  </section>
+
+  <section id="changelog">
+    <div class="sec-head">
+      <span class="sec-num">06</span>
+      <h2>Change<em>log</em></h2>
+    </div>
+    <ul class="log">
+      <li class="future"><div class="when">2027 · Jun</div><p class="what">MS in Computer Science, Northeastern University. <span class="tag sched">scheduled</span></p></li>
+      <li><div class="when">2026 · Aug</div><p class="what">Wrapped up the AWS RDS Proxy internship. The invariant held. <span class="tag ship">shipped</span></p></li>
+      <li><div class="when">2026 · Jun</div><p class="what">Joined RDS Proxy as an SDE intern. Learned how big a "fleet" really is. <span class="tag ship">deployed</span></p></li>
+      <li><div class="when">ongoing</div><p class="what">Reviewing every bubble tea shop within three miles. <span class="tag wip">in progress</span></p></li>
+      <li><div class="when">some tuesday</div><p class="what">Repotted Postgres (the plant). Zero downtime, one spilled bag of soil. <span class="tag inc">minor incident</span></p></li>
+    </ul>
+  </section>
+
+  <section id="status">
+    <div class="sec-head">
+      <span class="sec-num">07</span>
+      <h2>Status <em>page</em></h2>
+      <p class="sec-sub">Last 30 days. Updated whenever I remember.</p>
+    </div>
+    <div class="card status" id="status-card"></div>
+  </section>
+
+  <div class="contact">
+    <h2>Let's <em>talk</em>.</h2>
+    <p>Open to new-grad backend and infrastructure roles for 2027, and always up for a good conversation about databases, distributed systems, or boba.</p>
+    <div class="cta">
+      <a class="btn primary" href="mailto:hazelhu26@outlook.com">hazelhu26@outlook.com</a>
+      <a class="btn" href="https://github.com/123321-xy" target="_blank" rel="noopener">github/123321-xy ↗</a>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© <span id="yr"></span> Xinyi Hu · hand-written HTML, no frameworks harmed</span>
+    <span id="konami-hint">psst: try the konami code</span>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  const $ = (s, el = document) => el.querySelector(s);
+  const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  $('#yr').textContent = new Date().getFullYear();
+
+  const toast = (msg) => {
+    const t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(() => t.classList.remove('show'), 2600);
+  };
+
+  /* ---------- theme ---------- */
+  const root = document.documentElement;
+  try { const saved = localStorage.getItem('theme'); if (saved) root.dataset.theme = saved; } catch (e) {}
+  const isDark = () => root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  $('#theme').addEventListener('click', () => {
+    root.dataset.theme = isDark() ? 'light' : 'dark';
+    try { localStorage.setItem('theme', root.dataset.theme); } catch (e) {}
+    readColors();
+    toast(isDark() ? 'dark mode: failover complete' : 'light mode: back on primary');
+  });
+
+  /* ---------- proxy flow canvas ---------- */
+  const cv = $('#flow'), ctx = cv.getContext('2d');
+  const tls = $('#tls');
+  let W = 0, H = 0, colors = {}, packets = [], served = 0, rejected = 0, flashes = [0, 0, 0];
+  let running = true, last = performance.now(), spawnAcc = 0;
+
+  function readColors() {
+    const cs = getComputedStyle(root);
+    ['--ink', '--muted', '--line', '--accent', '--ok', '--surface', '--bg'].forEach(k => colors[k.slice(2)] = cs.getPropertyValue(k).trim());
+  }
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', readColors);
+
+  function resize() {
+    const dpr = window.devicePixelRatio || 1;
+    W = cv.clientWidth; H = cv.clientHeight;
+    cv.width = W * dpr; cv.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  const proxy = () => ({ x: W * 0.46, y: H / 2, w: Math.min(110, W * 0.26), h: 46 });
+  const reps = () => [0.22, 0.5, 0.78].map(f => ({ x: W * 0.86, y: H * f }));
+
+  function spawn() {
+    packets.push({ x: -8, y: H * (0.12 + Math.random() * 0.76), stage: 0, enc: Math.random() > 0.3, a: 1, target: null, sp: 90 + Math.random() * 70 });
+  }
+
+  function step(dt) {
+    const p = proxy(), rs = reps();
+    for (const k of packets) {
+      let tx, ty;
+      if (k.stage === 0) { tx = p.x - p.w / 2; ty = p.y + (k.y - p.y) * 0.15; }
+      else if (k.stage === 1) { tx = rs[k.target].x - 16; ty = rs[k.target].y; }
+      else { tx = p.x - p.w / 2 - 70; ty = k.y + (k.y < p.y ? -30 : 30); k.a -= dt * 1.6; }
+      const dx = tx - k.x, dy = ty - k.y, d = Math.hypot(dx, dy);
+      const mv = k.sp * dt * (k.stage === 2 ? 0.8 : 1);
+      if (d <= mv) {
+        k.x = tx; k.y = ty;
+        if (k.stage === 0) {
+          if (tls.checked && !k.enc) { k.stage = 2; rejected++; $('#rejected').textContent = rejected; }
+          else { k.stage = 1; k.target = Math.floor(Math.random() * 3); k.x = p.x + p.w / 2; }
+        } else if (k.stage === 1) {
+          k.done = true; served++; flashes[k.target] = 1; $('#served').textContent = served;
+        }
+      } else { k.x += dx / d * mv; k.y += dy / d * mv; }
+      if (k.a <= 0) k.done = true;
+    }
+    packets = packets.filter(k => !k.done);
+    flashes = flashes.map(f => Math.max(0, f - dt * 2.5));
+  }
+
+  function rr(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, h, r) : ctx.rect(x, y, w, h); }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    const p = proxy(), rs = reps();
+    ctx.setLineDash([4, 5]); ctx.strokeStyle = colors.line; ctx.lineWidth = 1.5;
+    for (const r of rs) { ctx.beginPath(); ctx.moveTo(p.x + p.w / 2, p.y); ctx.lineTo(r.x - 16, r.y); ctx.stroke(); }
+    ctx.setLineDash([]);
+
+    // replicas
+    rs.forEach((r, i) => {
+      const w = 30, h = 34, x = r.x - w / 2, y = r.y - h / 2;
+      ctx.fillStyle = flashes[i] > 0 ? mix(colors.ok, colors.surface, flashes[i]) : colors.surface;
+      ctx.strokeStyle = colors.ink; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(x, y + 5); ctx.lineTo(x, y + h - 5);
+      ctx.ellipse(r.x, y + h - 5, w / 2, 5, 0, Math.PI, 0, true); ctx.lineTo(x + w, y + 5);
+      ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(r.x, y + 5, w / 2, 5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = colors.muted; ctx.font = '10px "JetBrains Mono", monospace'; ctx.textAlign = 'center';
+      ctx.fillText('pg-' + (i + 1), r.x, y + h + 13);
+    });
+
+    // proxy
+    rr(p.x - p.w / 2, p.y - p.h / 2, p.w, p.h, 12);
+    ctx.fillStyle = colors.ink; ctx.fill();
+    ctx.fillStyle = colors.bg; ctx.font = 'italic 20px "Instrument Serif", Georgia, serif'; ctx.textAlign = 'center';
+    ctx.fillText('xinyi', p.x, p.y + 3);
+    ctx.font = '9px "JetBrains Mono", monospace'; ctx.fillStyle = tls.checked ? colors.ok : colors.muted;
+    ctx.fillText(tls.checked ? '🔒 tls: required' : 'tls: optional', p.x, p.y + 16);
+
+    // packets
+    for (const k of packets) {
+      ctx.globalAlpha = Math.max(0, k.a);
+      ctx.beginPath(); ctx.arc(k.x, k.y, 4.5, 0, Math.PI * 2);
+      if (k.enc) { ctx.fillStyle = colors.ok; ctx.fill(); }
+      else { ctx.strokeStyle = colors.accent; ctx.lineWidth = 2; ctx.stroke(); }
+      if (k.stage === 2) { ctx.fillStyle = colors.accent; ctx.font = '12px "JetBrains Mono", monospace'; ctx.fillText('×', k.x, k.y - 9); }
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function mix(a, b, t) {
+    const pa = hex(a), pb = hex(b);
+    if (!pa || !pb) return a;
+    return `rgb(${pa.map((v, i) => Math.round(v * t + pb[i] * (1 - t))).join(',')})`;
+  }
+  function hex(h) { const m = /^#?([\da-f]{2})([\da-f]{2})([\da-f]{2})$/i.exec(h); return m && m.slice(1).map(x => parseInt(x, 16)); }
+
+  function loop(now) {
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    if (running) {
+      if (!reduced) { spawnAcc += dt; while (spawnAcc > 0.38) { spawn(); spawnAcc -= 0.38; } }
+      step(dt); draw();
+    }
+    requestAnimationFrame(loop);
+  }
+  cv.addEventListener('click', () => { for (let i = 0; i < 8; i++) setTimeout(spawn, i * 50); });
+  tls.addEventListener('change', () => toast(tls.checked ? 'TLS required. plaintext gets bounced.' : 'TLS optional. (the auditors are frowning)'));
+  new IntersectionObserver(([e]) => { running = e.isIntersecting; }).observe(cv);
+  readColors(); resize(); addEventListener('resize', resize);
+  if (reduced) for (let i = 0; i < 6; i++) spawn();
+  requestAnimationFrame(loop);
+
+  /* ---------- terminal ---------- */
+  const out = $('#term-out'), inp = $('#term-in'), body = $('#term-body');
+  const hist = []; let hi = 0;
+  const esc = s => s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const print = (html) => { out.innerHTML += html + '\n'; body.scrollTop = body.scrollHeight; };
+
+  function table(cols, rows) {
+    const w = cols.map((c, i) => Math.max(c.length, ...rows.map(r => String(r[i]).length)));
+    const line = r => ' ' + r.map((v, i) => String(v).padEnd(w[i])).join(' | ');
+    return `<span class="tbl"><span class="t-acc">${esc(line(cols))}</span>\n` + '-' + w.map(n => '-'.repeat(n)).join('-+-') + '-\n'
+      + rows.map(r => esc(line(r))).join('\n') + `</span><span class="t-dim">(${rows.length} row${rows.length > 1 ? 's' : ''})</span>`;
+  }
+
+  const cmds = {
+    help: () => `<span class="t-dim">available queries:</span>
+  whoami                       who is this
+  SELECT * FROM education;     where I study
+  SELECT * FROM experience;    where I've worked
+  SELECT * FROM skills;        what I use
+  SELECT * FROM hobbies;       what I do instead of sleeping
+  ls projects                  things I built
+  cat fun_facts.txt            trivia, unverified
+  EXPLAIN ANALYZE xinyi;       how my brain plans queries
+  contact                      how to reach me
+  clear                        wipe the screen
+<span class="t-dim">(some other commands may also work. writes will not.)</span>`,
+    whoami: () => `<span class="t-ok">xinyi hu</span> — backend / distributed systems engineer
+MS CS @ Northeastern (expected Jun 2027) · previously SDE intern @ AWS RDS Proxy
+<span class="t-dim">favorite word: invariant. least favorite: "it works on my machine".</span>`,
+    'select * from education': () => table(['school', 'degree', 'gpa', 'expected'], [['Northeastern University', 'MS, Computer Science', '3.89 / 4.0', 'Jun 2027']])
+      + `\n<span class="t-dim">courses: scalable distributed systems, cloud computing, DBMS, algorithms, ML, reinforcement learning</span>`,
+    'select * from experience': () => table(['company', 'team', 'role', 'when'], [['Amazon Web Services', 'RDS Proxy', 'SDE Intern', 'Jun–Aug 2026']]),
+    'select * from skills': () => table(['pool', 'connections'], [
+      ['backend', 'Java, Go, Python, Spring Boot, Node.js, gRPC, REST'],
+      ['data', 'PostgreSQL, MySQL, Redis, MongoDB'],
+      ['cloud', 'AWS, Docker, Kubernetes, Jenkins, CI/CD'],
+      ['ai/ml', 'PyTorch, RAG, LangChain, pgvector, evals']]),
+    'select * from hobbies': () => table(['hobby', 'frequency', 'sla'], [
+      ['bubble tea reviews', 'weekly', 'p99 < 4 min to first sip'],
+      ['PNW hiking', 'when dry (rarely)', 'best effort'],
+      ['hand-pulled noodles', 'sundays', '60% success, retries w/ backoff'],
+      ['keeping Postgres alive', 'daily', '99.9% hydrated']]),
+    'ls projects': () => `<span class="t-ok">shoppingsystem/</span>   <span class="t-ok">configvault/</span>   <span class="t-ok">this-website/</span>   <span class="t-dim">.secret-side-project/</span>`,
+    'ls': () => `<span class="t-ok">projects/</span>   fun_facts.txt   resume.pdf   <span class="t-dim">.boba_ratings.csv</span>`,
+    'ls -a': () => cmds.ls(),
+    'cat .boba_ratings.csv': () => `shop,latency_p99,chewiness,verdict
+<span class="t-dim">[REDACTED: legal says I can't publish this]</span>`,
+    'cat resume.pdf': () => `<span class="t-err">binary file. </span>but you can just email me for it: <span class="t-acc">hazelhu26@outlook.com</span>`,
+    'cat fun_facts.txt': () => [
+      '- my pothos is named Postgres. its cutting is named Replica.',
+      '- I once wrote a design doc to decide where to eat. it had a rollback plan.',
+      '- I can explain WAL vs. streaming replication with dumplings.',
+      '- favorite data structure: skip list. a linked list that took the stairs.',
+      '- in group chats I run W=1, R=5: rarely write, read everything.'].join('\n'),
+    'explain analyze xinyi': () => `<span class="t-acc">QUERY PLAN</span>
+------------------------------------------------------------------
+ Nested Loop  (cost=0.00..∞ rows=1 width=curious) (actual time=coffee..ship)
+   ->  Index Scan using invariants_idx on problem  (rows=1)
+         Filter: (one_sentence = true)
+   ->  Hash Join  (cond: design_doc.tradeoffs = reality.constraints)
+         ->  Seq Scan on edge_cases  (rows=all of them)
+ Planning Time: longer than you'd think
+ Execution Time: <span class="t-ok">fast, once the plan is right</span>`,
+    'explain xinyi': () => cmds['explain analyze xinyi'](),
+    'drop table xinyi': () => `<span class="t-err">ERROR:  permission denied for table xinyi</span>
+<span class="t-dim">HINT:  this is a read replica. also, she has one-call rollback (see ConfigVault).</span>`,
+    'sudo make coffee': () => `[sudo] password for visitor: ********
+<span class="t-err">visitor is not in the sudoers file. this incident will be reported.</span>
+<span class="t-dim">(coffee is a managed service. please file a ticket with the barista.)</span>`,
+    'sudo make me a sandwich': () => `<span class="t-ok">okay.</span> 🥪 <span class="t-dim">(xkcd 149 compliance: verified)</span>`,
+    ping: () => `PONG <span class="t-dim">(2ms) — email replies are slower but more durable.</span>`,
+    contact: () => `email   <span class="t-acc">hazelhu26@outlook.com</span>
+github  <span class="t-acc">github.com/123321-xy</span>`,
+    hire: () => { setTimeout(() => location.href = 'mailto:hazelhu26@outlook.com?subject=Let%27s%20talk', 400); return '<span class="t-ok">opening a connection to your mail client…</span>'; },
+    rollback: () => `<span class="t-warn">WARNING:  there is no transaction in progress</span>
+<span class="t-dim">(but I appreciate the instinct.)</span>`,
+    exit: () => `<span class="t-dim">there is no exit. there is only </span><a href="#work">scrolling down</a>.`,
+    '\\q': () => cmds.exit(),
+    clear: () => { out.innerHTML = ''; return null; },
+  };
+  const aliases = { '?': 'help', '\\?': 'help', 'select * from xinyi': 'whoami', email: 'contact' };
+
+  function run(raw) {
+    const q = raw.trim();
+    if (!q) return;
+    hist.push(q); hi = hist.length;
+    print(`<span class="prompt">brain=&gt;</span> ${esc(q)}`);
+    let key = q.toLowerCase().replace(/;+\s*$/, '').replace(/\s+/g, ' ');
+    key = aliases[key] || key;
+    let res;
+    if (cmds[key]) res = cmds[key]();
+    else if (/^(insert|update|delete|alter|create|truncate|grant)\b/.test(key)) res = `<span class="t-err">ERROR:  cannot execute ${esc(key.split(' ')[0].toUpperCase())} in a read-only transaction</span>`;
+    else if (/^select\b/.test(key)) { const m = /from\s+(\w+)/.exec(key); res = `<span class="t-err">ERROR:  relation "${esc(m ? m[1] : '?')}" does not exist</span>\n<span class="t-dim">try: education, experience, skills, hobbies</span>`; }
+    else res = `<span class="t-err">${esc(q.split(' ')[0])}: command not found.</span> <span class="t-dim">try 'help'</span>`;
+    if (res !== null) print(res + '\n');
+  }
+
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { run(inp.value); inp.value = ''; }
+    else if (e.key === 'ArrowUp' && hist.length) { hi = Math.max(0, hi - 1); inp.value = hist[hi]; e.preventDefault(); }
+    else if (e.key === 'ArrowDown' && hist.length) { hi = Math.min(hist.length, hi + 1); inp.value = hist[hi] || ''; e.preventDefault(); }
+  });
+  body.addEventListener('click', () => { if (!getSelection().toString()) inp.focus({ preventScroll: true }); });
+  $$('#chips .chip').forEach(c => c.addEventListener('click', () => run(c.textContent)));
+  print(`<span class="t-dim">psql (16.4) — connected to </span><span class="t-ok">xinyi</span><span class="t-dim"> as visitor. read-only.
+type "help" for a list of queries.</span>\n`);
+
+  /* ---------- quorum playground ---------- */
+  const N = 5, wIn = $('#w');
+  $('#replicas').innerHTML = Array.from({ length: N }, (_, i) => `<div class="rep">r${i + 1}</div>`).join('');
+  function quorum() {
+    const w = +wIn.value, r = N - w + 1;
+    $('#w-val').textContent = w; $('#r-val').textContent = r;
+    $$('#replicas .rep').forEach((el, i) => { el.classList.toggle('w', i < w); el.classList.toggle('r', i >= N - r); });
+    const label = w === 5 ? 'Product' : w === 1 ? 'Cart' : 'custom';
+    $('#q-label').textContent = label;
+    const why = w === 5 ? 'Reads are cheap: any single replica is fresh. Perfect for a catalog everyone browses.'
+      : w === 1 ? 'Writes are cheap: only ~10% of carts reach checkout, so pay at read time instead.'
+      : 'A balanced split. Reads and writes each pay a little.';
+    $('#q-note').innerHTML = `<b>W + R = ${w + r} &gt; N = ${N}</b>: every read set overlaps the latest write (✓). ${why}`;
+  }
+  wIn.addEventListener('input', quorum);
+  $$('.mini[data-w]').forEach(b => b.addEventListener('click', () => { wIn.value = b.dataset.w; quorum(); }));
+  quorum();
+
+  /* ---------- configvault ---------- */
+  const versions = [
+    { v: 1, cfg: 'timeout_ms: 300\nretries: 1' },
+    { v: 2, cfg: 'timeout_ms: 250\nretries: 2' },
+    { v: 3, cfg: 'timeout_ms: 200\nretries: 3\ncircuit_breaker: on' },
+  ];
+  const badCfgs = ['timeout_ms: -1   # "it\'s fine"', 'retries: ∞       # what could go wrong', 'circuit_breaker: vibes', 'timeout_ms: "fast pls"'];
+  let active = 2, badIdx = 0;
+  function renderCV() {
+    $('#versions').innerHTML = versions.map((x, i) => `<span class="ver${i === active ? ' active' : ''}${x.bad ? ' bad' : ''}">v${x.v}</span>`).join('');
+    $('#cfg').textContent = versions[active].cfg;
+    const down = versions[active].bad;
+    $$('#svcs .svc').forEach((s, i) => s.classList.toggle('down', down && i !== 0));
+    $('#cv-state').textContent = down ? '🔥 incident' : 'healthy';
+    $('#cv-rollback').disabled = !down;
+    $('#cv-push').disabled = down;
+  }
+  $('#cv-push').addEventListener('click', () => {
+    const v = versions[versions.length - 1].v + 1;
+    versions.push({ v, cfg: badCfgs[badIdx++ % badCfgs.length], bad: true });
+    active = versions.length - 1;
+    $('#cv-log').textContent = `audit: v${v} pushed by visitor. pagers are going off.`;
+    renderCV();
+  });
+  $('#cv-rollback').addEventListener('click', () => {
+    const from = versions[active].v;
+    let i = active; while (i > 0 && versions[i].bad) i--;
+    active = i;
+    $('#cv-log').textContent = `audit: rolled back v${from} → v${versions[active].v} in 1 call. postmortem: blameless.`;
+    renderCV();
+  });
+  renderCV();
+
+  /* ---------- connection pool ---------- */
+  $$('.pool-group').forEach(g => {
+    const conns = $$('.conn', g), counter = $('[data-count]', g);
+    const upd = () => { counter.textContent = `${$$('.conn.busy', g).length}/${conns.length} active`; };
+    conns.forEach(c => {
+      c.addEventListener('mouseenter', () => { c.classList.add('busy'); upd(); });
+      c.addEventListener('mouseleave', () => setTimeout(() => { c.classList.remove('busy'); upd(); }, 900));
+    });
+    upd();
+  });
+
+  /* ---------- status page ---------- */
+  const services = [
+    { name: 'backend brain', state: 'operational', cls: 'ok', pattern: () => '' },
+    { name: 'coffee supply', state: 'degraded performance', cls: 'deg', pattern: i => (i % 7 === 0 || i % 11 === 3) ? 'd' : (i === 17 ? 'o' : '') },
+    { name: 'inbox', state: 'operational (eventually)', cls: 'ok', pattern: i => i % 9 === 4 ? 'd' : '' },
+    { name: 'sleep', state: 'scheduled maintenance', cls: 'maint', pattern: i => i > 24 ? 'm' : (i % 5 === 1 ? 'd' : '') },
+  ];
+  $('#status-card').innerHTML = services.map(s => `
+    <div class="status-row">
+      <span class="name">${s.name}</span>
+      <div class="bars">${Array.from({ length: 30 }, (_, i) => `<i class="${s.pattern(i)}"></i>`).join('')}</div>
+      <span class="state ${s.cls}">${s.state}</span>
+    </div>`).join('');
+
+  /* ---------- konami ---------- */
+  const seq = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+  let pos = 0;
+  addEventListener('keydown', e => {
+    if (e.target === inp) return;
+    pos = e.key === seq[pos] ? pos + 1 : (e.key === seq[0] ? 1 : 0);
+    if (pos === seq.length) {
+      pos = 0;
+      const emojis = ['🧋', '🪴', '🍜', '🔒', '🐘'];
+      for (let i = 0; i < 40; i++) {
+        const s = document.createElement('div');
+        s.textContent = emojis[i % emojis.length];
+        s.style.cssText = `position:fixed;left:${Math.random() * 100}vw;top:-40px;font-size:${20 + Math.random() * 20}px;z-index:30;pointer-events:none;transition:transform ${2 + Math.random() * 2}s linear, opacity 3s;`;
+        document.body.appendChild(s);
+        requestAnimationFrame(() => requestAnimationFrame(() => { s.style.transform = `translateY(${innerHeight + 80}px) rotate(${Math.random() * 720 - 360}deg)`; }));
+        setTimeout(() => s.remove(), 4500);
+      }
+      $('#pill-text').textContent = 'boba levels: critical';
+      toast('achievement unlocked: read the footer');
+    }
+  });
+})();
+</script>
+</body>
+</html>
